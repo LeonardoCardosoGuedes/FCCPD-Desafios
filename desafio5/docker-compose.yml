@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # 1. API Gateway
+  api-gateway:
+    image: nginx:alpine
+    container_name: desafio5-gateway
+    ports:
+      - "80:80"  # Ponto único de entrada
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - service-users
+      - service-orders
+    networks:
+      - desafio5_rede
+    restart: always
+
+  # 2. Microsserviço de Usuários
+  service-users:
+    build: ./service_users
+    container_name: desafio5-users
+    expose:
+      - "5000"      # Torna a porta acessível INTERNAMENTE ao gateway
+    networks:
+      - desafio5_rede
+    restart: always
+
+  # 3. Microsserviço de Pedidos
+  service-orders:
+    build: ./service_orders
+    container_name: desafio5-orders
+    expose:
+      - "5001"      # Torna a porta acessível INTERNAMENTE ao gateway
+    networks:
+      - desafio5_rede
+    restart: always
+
+networks:
+  desafio5_rede:
+    driver: bridge

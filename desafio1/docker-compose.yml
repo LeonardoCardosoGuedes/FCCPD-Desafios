@@ -1,0 +1,28 @@
+services:
+  #container 1: servidor web
+  servidor_desafio1:
+    image: nginx:alpine
+    container_name: desafio1-servidor
+    volumes:
+      #colocar o arq conf no container
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - rede-desafio1
+    expose:
+      - "8080"
+
+  #container 2: cliente fazendo requisição
+  cliente_desafio1:
+    image: alpine/curl
+    container_name: desafio1-cliente
+    #loop: faz um curl a cada 5 segs.
+    command: /bin/sh -c "while true; do echo 'Enviando requisicao para o servidor...'; curl -s http://servidor_desafio1:8080; sleep 5; done"
+    networks:
+      - rede-desafio1
+    depends_on:
+      - servidor_desafio1
+
+#rede customizada
+networks:
+  rede-desafio1:
+    driver: bridge

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  #serviço A - fornecedor de dados
+  service-a:
+    build: ./service_a
+    container_name: desafio4-service-a
+    ports:
+      - "5000:5000" #testar o endpoint A
+    networks:
+      - desafio4_rede
+    restart: always
+
+  #serviço B - consumidor de cados
+  service-b:
+    build: ./service_b
+    container_name: desafio4-service-b
+    depends_on:
+      - service-a
+    environment:
+      #variável de ambiente usada no service_b/app.py para saber onde buscar o serviço A
+      #'service-a' é o hostname dado pelo docker compose.
+      SERVICE_A_URL: "http://service-a:5000/api/usuarios"
+ 
+    ports:
+      - "5001:5001" #testar o endpoint B
+    networks:
+      - desafio4_rede
+    restart: always
+
+networks:
+  desafio4_rede:
+    driver: bridge

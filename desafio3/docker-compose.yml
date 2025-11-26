@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  postgres_service:
+    image: postgres:15-alpine
+    container_name: postgres-desafio3
+    environment:
+      POSTGRES_USER: user_desafio
+      POSTGRES_PASSWORD: senha_desafio
+      POSTGRES_DB: appdb_desafio3
+    volumes:
+      - volume_desafio3_data:/var/lib/postgresql/data
+    networks:
+      - net_desafio3
+    restart: unless-stopped
+
+  redis_cache:
+    image: redis:alpine
+    container_name: redis-desafio3
+    networks:
+      - net_desafio3
+    restart: unless-stopped
+
+  app_web:
+    image: busybox
+    container_name: webapp-desafio3
+    depends_on:
+      - postgres_service
+      - redis_cache
+    environment:
+      DATABASE_HOST: postgres_service
+      DATABASE_USER: user_desafio
+      DATABASE_PASS: senha_desafio
+      REDIS_HOST: redis_cache
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    networks:
+      - net_desafio3
+    entrypoint: ["sh", "-c", "echo 'Aplicação Web em execução...' && tail -f /dev/null"]
+    restart: unless-stopped
+
+networks:
+  net_desafio3:
+    driver: bridge
+
+volumes:
+  volume_desafio3_data:
